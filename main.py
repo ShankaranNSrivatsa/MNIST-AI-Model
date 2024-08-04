@@ -4,7 +4,8 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 
 import io
-
+import os
+import ssl
 import time
 import torch
 import torch.nn as nn
@@ -42,11 +43,18 @@ class ConvNet(nn.Module):
     x=self.fc3(x)
     return x
 
+ssl._create_default_https_context = ssl._create_unverified_context
 
 transform = transforms.Compose([
     transforms.ToTensor()
 ])
-dataset = datasets.MNIST(root='data', train=True, download=True, transform=transform)
+
+data_path = 'data'
+
+# Check if the main file is already present
+file_present = os.path.exists(os.path.join(data_path, 'train-images-idx3-ubyte.gz'))
+
+dataset = datasets.MNIST(root='data', train=True, download=not file_present, transform=transform)
 
 train_size = int(0.8 * len(dataset))
 dev_size = int(0.1* len(dataset))
